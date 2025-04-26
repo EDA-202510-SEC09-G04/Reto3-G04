@@ -58,8 +58,18 @@ def print_req_3(control):
     """
         Función que imprime la solución del Requerimiento 3 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 3
-    pass
+    area = input('Ingrese el area que quiere consultar: ')
+    n = int(input('Ingrese el n que quiere consultar: '))
+    res, size = logic.req_3(control, n, area)
+    
+    headers = ['DR_NO', 'Date Rptd', 'TIME OCC', 'AREA NAME', 'Rpt Dist No', 'Part 1-2', 'Crm Cd', 'Status', 'LOCATION']
+    rows = [[d[h] for h in headers] for d in res]
+
+    print('\nTotal registros en el area: ' + str(size))
+    
+    print("\n N registros:")
+    print(tabulate(rows, headers=headers, tablefmt="pipe"))
+    
 
 
 def print_req_4(control):

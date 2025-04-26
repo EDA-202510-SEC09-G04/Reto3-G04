@@ -1,33 +1,39 @@
+# Función heapify para garantizar que la propiedad del max-heap se mantenga
 def heapify(arr, n, i, key_fn):
-    smallest = i
+    largest = i  # Cambiar "smallest" por "largest" para max-heap
     left = 2 * i + 1
     right = 2 * i + 2
 
-    if left < n and key_fn(arr[left]) < key_fn(arr[smallest]):
-        smallest = left
+    # Comparamos el hijo izquierdo con el nodo actual (i)
+    if left < n and key_fn(arr[left]) > key_fn(arr[largest]):  # Cambiar '<' por '>'
+        largest = left
 
-    if right < n and key_fn(arr[right]) < key_fn(arr[smallest]):
-        smallest = right
+    # Comparamos el hijo derecho con el nodo actual (i)
+    if right < n and key_fn(arr[right]) > key_fn(arr[largest]):  # Cambiar '<' por '>'
+        largest = right
 
-    if smallest != i:
-        arr[i], arr[smallest] = arr[smallest], arr[i]
-        heapify(arr, n, smallest, key_fn)
+    # Si el nodo actual no es el más grande, intercambiamos y seguimos haciendo heapify
+    if largest != i:
+        arr[i], arr[largest] = arr[largest], arr[i]
+        heapify(arr, n, largest, key_fn)
 
-
+# Función para construir el heap desde una lista de elementos
 def build_heap(arr, key_fn):
     n = len(arr)
+    # Empezamos a hacer heapify desde el último nodo no hoja
     for i in range(n // 2 - 1, -1, -1):
         heapify(arr, n, i, key_fn)
 
-
+# Función para insertar un nuevo elemento en el heap
 def heap_insert(arr, key_fn, value):
     arr.append(value)
     i = len(arr) - 1
-    while i > 0 and key_fn(arr[i]) < key_fn(arr[(i - 1) // 2]):
+    # Nos aseguramos de que el elemento insertado mantenga la propiedad del max-heap
+    while i > 0 and key_fn(arr[i]) > key_fn(arr[(i - 1) // 2]):  # Cambiar '<' por '>'
         arr[i], arr[(i - 1) // 2] = arr[(i - 1) // 2], arr[i]
         i = (i - 1) // 2
 
-
+# Función para extraer el elemento máximo (la raíz del heap)
 def heap_pop(arr, key_fn):
     if len(arr) == 0:
         return None
@@ -35,27 +41,7 @@ def heap_pop(arr, key_fn):
     root = arr[0]
     arr[0] = arr[-1]
     arr.pop()
-    heapify(arr, len(arr), 0, key_fn)
+    heapify(arr, len(arr), 0, key_fn)  # Aseguramos que el heap mantenga la propiedad
 
     return root
 
-
-# Función de ejemplo para extraer el valor que queremos ordenar
-def key_fn(item):
-    return item['value']  # Aquí puedes cambiar la clave de ordenación
-
-
-# Ejemplo de uso
-heap = [{'value': 5}, {'value': 3}, {'value': 8}, {'value': 1}, {'value': 4}]
-build_heap(heap, key_fn)
-
-print("Heap:", heap)
-
-# Insertar nuevo elemento
-heap_insert(heap, key_fn, {'value': 2})
-print("Heap after insert:", heap)
-
-# Extraer el elemento mínimo
-min_item = heap_pop(heap, key_fn)
-print("Min item:", min_item)
-print("Heap after pop:", heap)

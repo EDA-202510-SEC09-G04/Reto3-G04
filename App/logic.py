@@ -11,6 +11,8 @@ from DataStructures.Map import map_entry as me
 from DataStructures.Map import map_functions as mf
 from DataStructures.Utils import error as error
 from DataStructures.Tree import red_black_tree as rbt
+from DataStructures.Tree import heap as hp
+
 
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 data_dir = os.path.dirname(os.path.realpath('__file__')) + '/Data/'
@@ -27,7 +29,7 @@ def new_logic():
         'registros': lt.new_list(),
         'por_fecha_ocurrido': rbt.new_map(),
         'por_fecha_reportado': rbt.new_map(),
-        'por_area': msc.new_map()
+        'por_area': msc.new_map(29,0.75)
     }
     return catalog
 
@@ -70,6 +72,10 @@ def load_data(catalog):
         if not msc.contains(catalog['por_area'], area):
             msc.put(catalog['por_area'], area, [])
         
+        area_list = msc.get(catalog['por_area'], area)
+        area_list.append(row)
+        msc.put(catalog['por_area'], area, area_list)
+        
     #total_reportes = catalog['por_fecha_ocurrido']['root']['size']
     #print(total_reportes)
     
@@ -105,12 +111,27 @@ def req_2(catalog):
     pass
 
 
-def req_3(catalog):
+def req_3(catalog, n, area):
     """
     Retorna el resultado del requerimiento 3
     """
-    # TODO: Modificar el requerimiento 3
-    pass
+    #lista de los crimenes del area
+    area_selected = msc.get(catalog['por_area'], area)
+    
+    #crear heap a partir del area
+    def key_fn(item):
+        return item['Date Rptd']
+
+    hp.build_heap(area_selected, key_fn)
+    
+    top_n = []
+    for _ in range(n):  
+        top_n.append(hp.heap_pop(area_selected, key_fn))
+        
+    size = len(area_selected)
+    return top_n, size
+    
+    
 
 
 def req_4(catalog):
