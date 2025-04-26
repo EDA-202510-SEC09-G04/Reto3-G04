@@ -120,15 +120,16 @@ def req_3(catalog, n, area):
     
     #crear heap a partir del area
     def key_fn(item):
-        return item['Date Rptd']
+        return (item['Date Rptd'], ''.join(chr(255 - ord(c)) for c in item['AREA NAME']))
 
     hp.build_heap(area_selected, key_fn)
+    size = len(area_selected)
     
     top_n = []
     for _ in range(n):  
         top_n.append(hp.heap_pop(area_selected, key_fn))
         
-    size = len(area_selected)
+    
     return top_n, size
     
     
