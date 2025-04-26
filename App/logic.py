@@ -4,7 +4,7 @@ import csv
 import sys
 import pprint as pprint
 from datetime import datetime
-#from DataStructures.Map import map_separate_chaining as msc
+from DataStructures.Map import map_separate_chaining as msc
 from DataStructures.List import array_list as lt
 from DataStructures.List import single_linked_list as slist
 from DataStructures.Map import map_entry as me
@@ -26,7 +26,8 @@ def new_logic():
     catalog = {
         'registros': lt.new_list(),
         'por_fecha_ocurrido': rbt.new_map(),
-        'por_fecha_reportado': rbt.new_map()
+        'por_fecha_reportado': rbt.new_map(),
+        'por_area': msc.new_map()
     }
     return catalog
 
@@ -43,16 +44,31 @@ def load_data(catalog):
 
     for row in input_file:
         row['DATE OCC'] = datetime.strptime(row["DATE OCC"], "%m/%d/%Y %I:%M:%S %p")
-        fecha = row['DATE OCC'].date()
+        row['Date Rptd'] = datetime.strptime(row["Date Rptd"], "%m/%d/%Y %I:%M:%S %p")
+
+        fecha_ocurrido = row['DATE OCC'].date()
         #lista general
         lt.add_last(catalog['registros'], row)
         
         #arbol por fechas de ocurrido
-        if not rbt.contains(catalog['por_fecha_ocurrido'], fecha):
-            rbt.put(catalog['por_fecha_ocurrido'], fecha, [])
+        if not rbt.contains(catalog['por_fecha_ocurrido'], fecha_ocurrido):
+            rbt.put(catalog['por_fecha_ocurrido'], fecha_ocurrido, [])
         
-        node = rbt.get(catalog['por_fecha_ocurrido'], fecha)
+        node = rbt.get(catalog['por_fecha_ocurrido'], fecha_ocurrido)
         node.append(row)
+        
+        #arbol por fechas reportado
+        fecha_reportado = row['Date Rptd'].date()
+        if not rbt.contains(catalog['por_fecha_reportado'], fecha_reportado):
+            rbt.put(catalog['por_fecha_reportado'], fecha_reportado, [])
+            
+        node2 = rbt.get(catalog['por_fecha_reportado'], fecha_reportado)
+        node2.append(row)
+        
+        #hash de area -> lista de diccionarios -> priority queue por fecha reportado
+        area = row['AREA NAME']
+        if not msc.contains(catalog['por_area'], area):
+            msc.put(catalog['por_area'], area, [])
         
     #total_reportes = catalog['por_fecha_ocurrido']['root']['size']
     #print(total_reportes)

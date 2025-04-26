@@ -126,6 +126,7 @@ def main():
 
             size = len(catalog['registros']['elements'])
             print('\nTotal registros cargados: ' + str(size))
+            
             print("\nPrimeros 5 registros:")
             print(tabulate(rows, headers=headers, tablefmt="pipe"))
             print("\nUltimos 5 registros:")
