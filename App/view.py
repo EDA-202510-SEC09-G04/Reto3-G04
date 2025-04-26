@@ -1,12 +1,14 @@
 import sys
+from App import logic
+from tabulate import tabulate
 
 
 def new_logic():
     """
         Se crea una instancia del controlador
     """
-    #TODO: Llamar la función de la lógica donde se crean las estructuras de datos
-    pass
+    control = logic.new_logic()
+    return control
 
 def print_menu():
     print("Bienvenido")
@@ -25,8 +27,8 @@ def load_data(control):
     """
     Carga los datos
     """
-    #TODO: Realizar la carga de datos
-    pass
+    catalog, primeros, ultimos = logic.load_data(control)
+    return catalog, primeros, ultimos
 
 
 def print_data(control, id):
@@ -115,7 +117,21 @@ def main():
         inputs = input('Seleccione una opción para continuar\n')
         if int(inputs) == 1:
             print("Cargando información de los archivos ....\n")
-            data = load_data(control)
+            catalog, primeros, ultimos = load_data(control)
+            #print(catalog['por_fecha_ocurrido'])
+            
+            headers = ['DR_NO', 'Date Rptd', 'DATE OCC', 'AREA NAME', 'Crm Cd']
+            rows = [[d[h] for h in headers] for d in primeros]
+            rows2 = [[d[h] for h in headers] for d in ultimos]
+
+            size = len(catalog['registros']['elements'])
+            print('\nTotal registros cargados: ' + str(size))
+            print("\nPrimeros 5 registros:")
+            print(tabulate(rows, headers=headers, tablefmt="pipe"))
+            print("\nUltimos 5 registros:")
+            print(tabulate(rows2, headers=headers, tablefmt="pipe"))
+
+
         elif int(inputs) == 2:
             print_req_1(control)
 
