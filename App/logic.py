@@ -29,7 +29,8 @@ def new_logic():
         'registros': lt.new_list(),
         'por_fecha_ocurrido': rbt.new_map(),
         'por_fecha_reportado': rbt.new_map(),
-        'por_area': msc.new_map(29,0.75)
+        'por_area': msc.new_map(29,0.75),
+        'por_edad': rbt.new_map()
     }
     return catalog
 
@@ -76,8 +77,13 @@ def load_data(catalog):
         area_list.append(row)
         msc.put(catalog['por_area'], area, area_list)
         
-    #total_reportes = catalog['por_fecha_ocurrido']['root']['size']
-    #print(total_reportes)
+        #arbol por edad -> lista de crimenes con victima de esas edades
+        edad = row['Vict Age']
+        if not rbt.contains(catalog['por_edad'], edad):
+            rbt.put(catalog['por_edad'], edad, [])
+        
+        node = rbt.get(catalog['por_edad'], edad)
+        node.append(row)
     
     primeros = catalog['registros']['elements'][:5]
     ultimos = catalog['registros']['elements'][-5:]
@@ -86,6 +92,22 @@ def load_data(catalog):
         
 
 # Funciones de consulta sobre el catálogo
+def busqueda_entre_fechas(node, inicial, final, resultados):
+    
+    if node is None:
+        return
+    # Si la clave del nodo actual está dentro del rango, agregamos su información
+    if inicial <= node['key'] <= final:
+        resultados.extend(node['value'])  
+
+    # Si la clave del nodo actual es mayor que el inicio, podemos encontrar más a la izquierda
+    if inicial < node['key']:
+        busqueda_entre_fechas(node['left'], inicial, final, resultados)
+
+    # Si la clave del nodo actual es menor que el final, podemos encontrar más a la derecha
+    if node['key'] < final:
+        busqueda_entre_fechas(node['right'], inicial, final, resultados)
+        
 
 def get_data(catalog, id):
     """
@@ -143,12 +165,71 @@ def req_4(catalog):
     pass
 
 
-def req_5(catalog):
+def req_5(catalog, n, inicial, final):
     """
     Retorna el resultado del requerimiento 5
     """
-    # TODO: Modificar el requerimiento 5
-    pass
+    #buscar crimenes entre rango de fechas con el arbol por fecha
+
+    #cambiar a formato m d y
+
+    inicial = datetime.strptime(inicial, "%Y-%m-%d").date()
+    final = datetime.strptime(final, "%Y-%m-%d").date()
+    root= catalog['por_fecha_ocurrido']['root']
+    res = []
+    busqueda_entre_fechas(root, inicial, final, res)
+    
+    #lista por areas
+    areas = {}
+    size = 0
+    for crimen in res:
+        if crimen['Status'] == 'IC':
+            size += 1
+            area = crimen['AREA']
+            if not area in areas:
+                dato = {
+                    'area_number': crimen['AREA'],
+                    'area_name' : crimen['AREA NAME'],
+                    'count' : 0,
+                    'mayor': datetime.strptime('01/01/1000', "%m/%d/%Y"),
+                    'menor': datetime.strptime('01/01/3000', "%m/%d/%Y"),
+                }
+                areas[area] = dato
+                
+            dato = areas[area]
+            #aumentar counter
+            dato['count'] = dato['count'] + 1
+            
+            #cambiar la date mayor o menor si la fecha del crimen es mayor o menor 
+            if crimen['DATE OCC'].date() < dato['menor'].date():
+                dato['menor'] = crimen['DATE OCC']
+            if crimen['DATE OCC'].date() > dato['mayor'].date():
+                dato['mayor'] = crimen['DATE OCC']
+
+            
+           
+            
+    lista_areas = [
+        {'area_number': area_number,
+        'area_name': data['area_name'],
+        'count': data['count'],
+        'mayor': data['mayor'],
+        'menor': data['menor']}
+        for area_number, data in areas.items()
+    ]
+    
+    #crear heap a partir del area
+    def key_fn(item):
+        return (item['count'], ''.join(chr(255 - ord(c)) for c in item['area_name']))
+    
+    hp.build_heap(lista_areas, key_fn)
+    
+    top_n = []
+    for _ in range(n):  
+        top_n.append(hp.heap_pop(lista_areas, key_fn))
+        
+    return top_n, size
+    
 
 def req_6(catalog):
     """

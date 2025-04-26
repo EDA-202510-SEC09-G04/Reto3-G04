@@ -84,9 +84,20 @@ def print_req_5(control):
     """
         Función que imprime la solución del Requerimiento 5 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 5
-    pass
+    n = int(input('Ingrese el n que quiere consultar: '))
+    inicial = input('Ingrese la fecha inicial en formato yy-mm-dd: ')
+    final = input('Ingrese la fecha final en formato yy-mm-dd: ')
 
+    res, size = logic.req_5(control, n, inicial, final)
+    
+    print('\nTotal crimenes no resueltos entre el rango de fechas: ' + str(size))
+    
+    headers = ['area_number', 'area_name', 'count', 'mayor', 'menor']
+    rows = [[d[h] for h in headers] for d in res]
+    
+    print("\n N registros:")
+    print(tabulate(rows, headers=headers, tablefmt="pipe"))
+    
 
 def print_req_6(control):
     """
