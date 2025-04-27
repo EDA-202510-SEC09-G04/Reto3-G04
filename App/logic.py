@@ -41,7 +41,7 @@ def load_data(catalog):
     """
     Carga los datos del reto
     """
-    files = data_dir + 'Crime_in_LA_20.csv'
+    files = data_dir + 'Crime_in_LA_100.csv'
     input_file = csv.DictReader(open(files, encoding='utf-8'))
 
 
@@ -108,6 +108,13 @@ def busqueda_entre_fechas(node, inicial, final, resultados):
     if node['key'] < final:
         busqueda_entre_fechas(node['right'], inicial, final, resultados)
         
+def rango_fechas_catalogo(catalog):
+    """
+    Devuelve la fecha mínima y máxima de los crímenes cargados
+    """
+    fechas = [row['DATE OCC'].date() for row in catalog['registros']['elements']]
+    fechas.sort()
+    return fechas[0], fechas[-1]
 
 def get_data(catalog, id):
     """
@@ -117,13 +124,43 @@ def get_data(catalog, id):
     pass
 
 
-def req_1(catalog):
+
+def req_1(catalog, fecha_inicial, fecha_final):
     """
     Retorna el resultado del requerimiento 1
     """
-    # TODO: Modificar el requerimiento 1
-    pass
+    from datetime import datetime
 
+    # Convertir las fechas
+    fecha_inicial = datetime.strptime(fecha_inicial, "%Y-%m-%d").date()
+    fecha_final = datetime.strptime(fecha_final, "%Y-%m-%d").date()
+
+    # Recorrer el árbol manualmente
+    root = catalog['por_fecha_ocurrido']['root']
+    crimenes_en_rango = []
+    busqueda_entre_fechas(root, fecha_inicial, fecha_final, crimenes_en_rango)
+
+    # Ahora sí tienes todos los crímenes en el rango
+    crimenes_list = []
+    for crimen in crimenes_en_rango:
+        if isinstance(crimen, dict):
+            crimenes_list.append(crimen)
+
+    print("Cantidad total de crímenes después de buscar:", len(crimenes_list))
+
+    # Definir key de ordenamiento
+    def key_fn(item):
+        hora = int(item['TIME OCC']) if isinstance(item['TIME OCC'], str) else item['TIME OCC']
+        return (
+            item['DATE OCC'].date(),
+            hora,
+            ''.join(chr(255 - ord(c)) for c in item['AREA NAME'])
+        )
+
+    # Ordenar
+    crimenes_ordenados = sorted(crimenes_list, key=key_fn, reverse=True)
+
+    return crimenes_ordenados
 
 def req_2(catalog):
     """

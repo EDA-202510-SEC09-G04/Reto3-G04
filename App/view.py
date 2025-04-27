@@ -1,6 +1,7 @@
 import sys
 from App import logic
 from tabulate import tabulate
+from datetime import datetime
 
 
 def new_logic():
@@ -12,6 +13,7 @@ def new_logic():
 
 def print_menu():
     print("Bienvenido")
+    print("0- Ejecutar Rango de fechas")
     print("1- Cargar información")
     print("2- Ejecutar Requerimiento 1")
     print("3- Ejecutar Requerimiento 2")
@@ -30,6 +32,13 @@ def load_data(control):
     catalog, primeros, ultimos = logic.load_data(control)
     return catalog, primeros, ultimos
 
+def print_rango_fechas(control):
+    """
+    Imprime el rango de fechas cargadas en el catálogo
+    """
+    fecha_min, fecha_max = logic.rango_fechas_catalogo(control)
+    print("\nFechas cargadas en el catálogo:")
+    print(f"Desde: {fecha_min} Hasta: {fecha_max}")
 
 def print_data(control, id):
     """
@@ -40,10 +49,39 @@ def print_data(control, id):
 
 def print_req_1(control):
     """
-        Función que imprime la solución del Requerimiento 1 en consola
+    Función que imprime la solución del Requerimiento 1 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 1
-    pass
+    fecha_inicial = input('Ingrese la fecha inicial (YYYY-MM-DD): ')
+    fecha_final = input('Ingrese la fecha final (YYYY-MM-DD): ')
+    
+    res = logic.req_1(control, fecha_inicial, fecha_final)
+
+    # Armar bien las filas para tabulate
+    headers = ['DR_NO', 'DATE OCC', 'TIME OCC', 'AREA NAME', 'Crm Cd', 'LOCATION']
+    
+    # Crear las filas basadas en los headers
+    rows = []
+    for crimen in res:
+        fila = [
+            crimen['DR_NO'],
+            crimen['DATE OCC'].strftime("%Y-%m-%d"),  # Mostrar solo fecha
+            crimen['TIME OCC'],
+            crimen['AREA NAME'],
+            crimen['Crm Cd'],
+            crimen['LOCATION']
+        ]
+        rows.append(fila)
+
+    print("\nTotal registros encontrados:", len(res))
+
+    # 🚀 Aquí imprimimos los primeros 5
+    print("\nPrimeros 5 registros:")
+    print(tabulate(rows[:5], headers=headers, tablefmt="pipe"))
+
+    # 🚀 Aquí imprimimos los últimos 5
+    print("\nÚltimos 5 registros:")
+    print(tabulate(rows[-5:], headers=headers, tablefmt="pipe"))
+
 
 
 def print_req_2(control):
@@ -136,6 +174,9 @@ def main():
     while working:
         print_menu()
         inputs = input('Seleccione una opción para continuar\n')
+        if int(inputs) == 0:
+            print_rango_fechas(control)
+
         if int(inputs) == 1:
             print("Cargando información de los archivos ....\n")
             catalog, primeros, ultimos = load_data(control)
