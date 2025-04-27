@@ -78,7 +78,7 @@ def load_data(catalog):
         msc.put(catalog['por_area'], area, area_list)
         
         #arbol por edad -> lista de crimenes con victima de esas edades
-        edad = row['Vict Age']
+        edad = int(row['Vict Age'])
         if not rbt.contains(catalog['por_edad'], edad):
             rbt.put(catalog['por_edad'], edad, [])
         
@@ -107,6 +107,11 @@ def busqueda_entre_fechas(node, inicial, final, resultados):
     # Si la clave del nodo actual es menor que el final, podemos encontrar más a la derecha
     if node['key'] < final:
         busqueda_entre_fechas(node['right'], inicial, final, resultados)
+        
+        
+
+    
+    
         
 
 def get_data(catalog, id):
@@ -155,15 +160,80 @@ def req_3(catalog, n, area):
     return top_n, size
     
     
+    
+def numero_crimenes_por_edad(catalog,n,edad_inicial,edad_final):
+    
+    root = catalog['por_edad']['root']
+    resultado = []
+    resultado_crimenes_graves = []
+    resultado_crimenes_pequeños = []
+    total_number = len(resultado)
+    
+    
+    busqueda_entre_fechas(root,edad_inicial,edad_final,resultado)
+    resultado.sort(key=lambda x: x ['Vict Age'])
+    
+    for i in range(n,1,-1):
+        
+        new_data = {
+            'DR_NO': resultado[i]['DR_NO'],
+            'Date Rptd': resultado[i]['Date Rptd'],
+            'DATE OCC': resultado[i]['DATE OCC'],
+            'Time OCC': resultado[i]['TIME OCC'],
+            'AREA': resultado[i]['AREA'],
+            'AREA NAME': resultado[i]['AREA NAME'],
+            'Part 1-2': resultado[i]['Part 1-2'],
+            'Crm Cd': resultado[i]['Crm Cd'],
+            'Vict Age': resultado[i]['Vict Age'],
+            'Status': resultado[i]['Status'],
+            'LOCATION': resultado[i]['LOCATION']
+            
+        }
+        
+        if resultado[i]['Part 1-2'] == '1':
+            
+            resultado_crimenes_graves.append(new_data)
+        
+        elif resultado[i]['Part 1-2'] == '2':
+            
+            resultado_crimenes_pequeños.append(new_data)
+    
+    
+    
+    resultado_crimenes_graves.sort(key= lambda x: (-int(x['Vict Age']), x['Date Rptd']))
+    resultado_crimenes_pequeños.sort(key= lambda x: (-int(x['Vict Age']), x['Date Rptd']))
+    
+    return resultado_crimenes_graves + resultado_crimenes_pequeños, total_number
+            
+    
+    
+   
+        
+        
+catalogo = new_logic()
+load_data(catalogo)
+
+crimenes = numero_crimenes_por_edad(catalogo,30,20,40)
+for i in crimenes:
+    
+    print(i['Vict Age'],i['Part 1-2'])
+    
+    
 
 
-def req_4(catalog):
+def req_4(catalog,n,edad_inicial,edad_final):
     """
     Retorna el resultado del requerimiento 4
     """
     # TODO: Modificar el requerimiento 4
-    pass
+    tiempo_incial = get_time()
+    resultados, total = numero_crimenes_por_edad(catalog,n,edad_inicial,edad_final)
+    tiempo_final = get_time()
+    
+    delta_time = tiempo_final - tiempo_incial
 
+    
+    return resultados, total
 
 def req_5(catalog, n, inicial, final):
     """
