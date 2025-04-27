@@ -76,7 +76,17 @@ def print_req_4(control):
     """
         Función que imprime la solución del Requerimiento 4 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 4
+    edad_inicial = int(input('ingrese la edad incial: '))
+    edad_final = int(input('ingrese la edad final: '))
+    numero_datos = int(input('Ingrese el número de datos que desea consultar:'))
+    res, size = logic.req_4(control,numero_datos,edad_inicial,edad_final)
+    
+    headers = ['DR_NO', 'Date Rptd', 'TIME OCC','AREA', 'AREA NAME', 'Part 1-2', 'Crm Cd', 'Status', 'LOCATION']
+    rows = [[d[h] for h in headers] for d in res]
+    
+    print('\nTotal registros que cumplen el filtro de edad' + str(size))
+    print(tabulate(rows, headers=headers, tablefmt="pipe"))
+
     pass
 
 

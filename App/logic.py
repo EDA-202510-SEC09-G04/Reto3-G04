@@ -122,12 +122,39 @@ def get_data(catalog, id):
     pass
 
 
-def req_1(catalog):
+def req_1(catalog,fecha_inicial,fecha_final):
     """
     Retorna el resultado del requerimiento 1
     """
-    # TODO: Modificar el requerimiento 1
-    pass
+    
+    root = catalog['por_fecha_reportado']['root']
+    resultados = []
+    result_data = []
+    
+    busqueda_entre_fechas(root,fecha_inicial,fecha_final,resultados)
+    
+    
+    for i in resultados:
+        
+        if i['Part 1-2'] == '1':
+         new_data = {
+            
+            'DR_NO': i['DR_NO'],
+            'DATE OCC':i['DATE OCC'],
+            'TIME OCC': i['TIME OCC'],
+            'AREA':i['AREA'],
+            'AREA NAME':i['AREA NAME'],
+            'Part 1-2': i['Part 1-2'],
+            'Crm Cd':i['Crm Cd'],
+            'Status':i['Status']
+            
+         }
+         
+         result_data.append(new_data)
+         
+    
+    return result_data
+        
 
 
 def req_2(catalog):
@@ -179,7 +206,7 @@ def numero_crimenes_por_edad(catalog,n,edad_inicial,edad_final):
             'DR_NO': resultado[i]['DR_NO'],
             'Date Rptd': resultado[i]['Date Rptd'],
             'DATE OCC': resultado[i]['DATE OCC'],
-            'Time OCC': resultado[i]['TIME OCC'],
+            'TIME OCC': resultado[i]['TIME OCC'],
             'AREA': resultado[i]['AREA'],
             'AREA NAME': resultado[i]['AREA NAME'],
             'Part 1-2': resultado[i]['Part 1-2'],
@@ -210,13 +237,7 @@ def numero_crimenes_por_edad(catalog,n,edad_inicial,edad_final):
    
         
         
-catalogo = new_logic()
-load_data(catalogo)
 
-crimenes = numero_crimenes_por_edad(catalogo,30,20,40)
-for i in crimenes:
-    
-    print(i['Vict Age'],i['Part 1-2'])
     
     
 
