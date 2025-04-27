@@ -78,7 +78,7 @@ def load_data(catalog):
         msc.put(catalog['por_area'], area, area_list)
         
         #arbol por edad -> lista de crimenes con victima de esas edades
-        edad = row['Vict Age']
+        edad = int(row['Vict Age'])
         if not rbt.contains(catalog['por_edad'], edad):
             rbt.put(catalog['por_edad'], edad, [])
         
@@ -124,43 +124,40 @@ def get_data(catalog, id):
     pass
 
 
-
-def req_1(catalog, fecha_inicial, fecha_final):
+def req_1(catalog,fecha_inicial,fecha_final):
     """
     Retorna el resultado del requerimiento 1
     """
-    from datetime import datetime
+    
+    root = catalog['por_fecha_reportado']['root']
+    resultados = []
+    result_data = []
+    
+    busqueda_entre_fechas(root,fecha_inicial,fecha_final,resultados)
+    
+    
+    for i in resultados:
+        
+        if i['Part 1-2'] == '1':
+         new_data = {
+            
+            'DR_NO': i['DR_NO'],
+            'DATE OCC':i['DATE OCC'],
+            'TIME OCC': i['TIME OCC'],
+            'AREA':i['AREA'],
+            'AREA NAME':i['AREA NAME'],
+            'Part 1-2': i['Part 1-2'],
+            'Crm Cd':i['Crm Cd'],
+            'Status':i['Status']
+            
+         }
+         
+         result_data.append(new_data)
+         
+    
+    return result_data
+        
 
-    # Convertir las fechas
-    fecha_inicial = datetime.strptime(fecha_inicial, "%Y-%m-%d").date()
-    fecha_final = datetime.strptime(fecha_final, "%Y-%m-%d").date()
-
-    # Recorrer el árbol manualmente
-    root = catalog['por_fecha_ocurrido']['root']
-    crimenes_en_rango = []
-    busqueda_entre_fechas(root, fecha_inicial, fecha_final, crimenes_en_rango)
-
-    # Ahora sí tienes todos los crímenes en el rango
-    crimenes_list = []
-    for crimen in crimenes_en_rango:
-        if isinstance(crimen, dict):
-            crimenes_list.append(crimen)
-
-    print("Cantidad total de crímenes después de buscar:", len(crimenes_list))
-
-    # Definir key de ordenamiento
-    def key_fn(item):
-        hora = int(item['TIME OCC']) if isinstance(item['TIME OCC'], str) else item['TIME OCC']
-        return (
-            item['DATE OCC'].date(),
-            hora,
-            ''.join(chr(255 - ord(c)) for c in item['AREA NAME'])
-        )
-
-    # Ordenar
-    crimenes_ordenados = sorted(crimenes_list, key=key_fn, reverse=True)
-
-    return crimenes_ordenados
 
 def req_2(catalog):
     """
@@ -192,15 +189,74 @@ def req_3(catalog, n, area):
     return top_n, size
     
     
+    
+def numero_crimenes_por_edad(catalog,n,edad_inicial,edad_final):
+    
+    root = catalog['por_edad']['root']
+    resultado = []
+    resultado_crimenes_graves = []
+    resultado_crimenes_pequeños = []
+    total_number = len(resultado)
+    
+    
+    busqueda_entre_fechas(root,edad_inicial,edad_final,resultado)
+    resultado.sort(key=lambda x: x ['Vict Age'])
+    
+    for i in range(n,1,-1):
+        
+        new_data = {
+            'DR_NO': resultado[i]['DR_NO'],
+            'Date Rptd': resultado[i]['Date Rptd'],
+            'DATE OCC': resultado[i]['DATE OCC'],
+            'TIME OCC': resultado[i]['TIME OCC'],
+            'AREA': resultado[i]['AREA'],
+            'AREA NAME': resultado[i]['AREA NAME'],
+            'Part 1-2': resultado[i]['Part 1-2'],
+            'Crm Cd': resultado[i]['Crm Cd'],
+            'Vict Age': resultado[i]['Vict Age'],
+            'Status': resultado[i]['Status'],
+            'LOCATION': resultado[i]['LOCATION']
+            
+        }
+        
+        if resultado[i]['Part 1-2'] == '1':
+            
+            resultado_crimenes_graves.append(new_data)
+        
+        elif resultado[i]['Part 1-2'] == '2':
+            
+            resultado_crimenes_pequeños.append(new_data)
+    
+    
+    
+    resultado_crimenes_graves.sort(key= lambda x: (-int(x['Vict Age']), x['Date Rptd']))
+    resultado_crimenes_pequeños.sort(key= lambda x: (-int(x['Vict Age']), x['Date Rptd']))
+    
+    return resultado_crimenes_graves + resultado_crimenes_pequeños, total_number
+            
+    
+    
+   
+        
+        
+
+    
+    
 
 
-def req_4(catalog):
+def req_4(catalog,n,edad_inicial,edad_final):
     """
     Retorna el resultado del requerimiento 4
     """
     # TODO: Modificar el requerimiento 4
-    pass
+    tiempo_incial = get_time()
+    resultados, total = numero_crimenes_por_edad(catalog,n,edad_inicial,edad_final)
+    tiempo_final = get_time()
+    
+    delta_time = tiempo_final - tiempo_incial
 
+    
+    return resultados, total
 
 def req_5(catalog, n, inicial, final):
     """
