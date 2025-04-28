@@ -79,7 +79,20 @@ def print_req_1(control):
 
 
 def print_req_2(control):
-    pass
+    
+    fecha_inicial = input('Ingrese la fecha inicial (YYYY-MM-DD): ')
+    fecha_final = input('Ingrese la fecha final (YYYY-MM-DD): ')
+
+    res, tiempo = logic.req_2(control,fecha_inicial,fecha_final)
+
+    headers = ['DR_NO', 'DATE OCC', 'TIME OCC', 'AREA','AREA NAME', 'Part 1-2','Crm Cd', 'Status']
+    
+    print('\nTiempo de ejcución' + str(tiempo))
+    print("\nPrimeros 5 registros:")
+    print(res[:5])
+    print("\nÚltimos 5 registros:")
+    print(res[-5:])
+
 
 
 def print_req_3(control):
@@ -107,16 +120,16 @@ def print_req_4(control):
     edad_inicial = int(input('ingrese la edad incial: '))
     edad_final = int(input('ingrese la edad final: '))
     numero_datos = int(input('Ingrese el número de datos que desea consultar:'))
-    res, size = logic.req_4(control,numero_datos,edad_inicial,edad_final)
+    res, size,time = logic.req_4(control,numero_datos,edad_inicial,edad_final)
     
     headers = ['DR_NO', 'Date Rptd', 'TIME OCC','AREA', 'AREA NAME', 'Part 1-2', 'Crm Cd', 'Status', 'LOCATION']
     rows = [[d[h] for h in headers] for d in res]
-    
+
+    print('\n Tiempo de ejecución: ' + str(time))
     print('\nTotal registros que cumplen el filtro de edad' + str(size))
     print(tabulate(rows, headers=headers, tablefmt="pipe"))
 
-    pass
-
+   
 
 def print_req_5(control):
     """
