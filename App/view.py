@@ -146,11 +146,23 @@ def print_req_6(control):
 
 
 def print_req_7(control):
-    """
-        Función que imprime la solución del Requerimiento 7 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 7
-    pass
+    n = int(input('Ingrese el número N de crímenes más comunes a calcular: '))
+    sexo = input('Ingrese el sexo de la víctima (M/F): ')
+    edad_inicial = int(input('Ingrese la edad inicial: '))
+    edad_final = int(input('Ingrese la edad final: '))
+    
+    resultados = logic.req_7(control, n, sexo, edad_inicial, edad_final)
+    
+    for crimen in resultados:
+        print(f"Código del crimen: {crimen['codigo']}")
+        print(f"Cantidad de crímenes cometidos: {crimen['total']}")
+        print("Cantidad de crímenes por edad:")
+        for edad, cantidad in crimen['por_edad'].items():
+            print(f"  Edad {edad}: {cantidad}")
+        print("Cantidad de crímenes por año:")
+        for anio, cantidad in crimen['por_anio'].items():
+            print(f"  Año {anio}: {cantidad}")
+        print("-" * 40)
 
 
 def print_req_8(control):

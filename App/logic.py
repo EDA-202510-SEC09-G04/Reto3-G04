@@ -107,6 +107,20 @@ def busqueda_entre_fechas(node, inicial, final, resultados):
     # Si la clave del nodo actual es menor que el final, podemos encontrar más a la derecha
     if node['key'] < final:
         busqueda_entre_fechas(node['right'], inicial, final, resultados)
+
+def busqueda_entre_edades(node, edad_inicial, edad_final, res):
+    if node is None:
+        return
+    
+    if edad_inicial < node['key']:
+        busqueda_entre_edades(node['left'], edad_inicial, edad_final, res)
+    
+    if edad_inicial <= node['key'] <= edad_final:
+        res.extend(node['value'])
+    
+    if node['key'] < edad_final:
+        busqueda_entre_edades(node['right'], edad_inicial, edad_final, res)
+
         
 def rango_fechas_catalogo(catalog):
     """
@@ -352,12 +366,35 @@ def req_6(catalog):
     pass
 
 
-def req_7(catalog):
-    """
-    Retorna el resultado del requerimiento 7
-    """
-    # TODO: Modificar el requerimiento 7
-    pass
+def req_7(catalog, n, sexo, edad_inicial, edad_final):
+    resultados = {}
+    
+    res = []
+    root = catalog['por_edad']['root']
+    busqueda_entre_edades(root, edad_inicial, edad_final, res)
+    
+    for crimen in res:
+        if crimen['Vict Sex'] == sexo:
+            codigo = crimen['Crm Cd']
+            anio = crimen['DATE OCC'].year
+            edad = int(crimen['Vict Age'])
+            if codigo not in resultados:
+                resultados[codigo] = {'total': 0, 'por_edad': {}, 'por_anio': {}}
+            resultados[codigo]['total'] += 1
+            resultados[codigo]['por_edad'][edad] = resultados[codigo]['por_edad'].get(edad, 0) + 1
+            resultados[codigo]['por_anio'][anio] = resultados[codigo]['por_anio'].get(anio, 0) + 1
+
+    lista_resultados = [
+        {'codigo': codigo, 
+         'total': data['total'], 
+         'por_edad': data['por_edad'], 
+         'por_anio': data['por_anio']}
+        for codigo, data in resultados.items()
+    ]
+    
+    lista_resultados.sort(key=lambda x: (-x['total'], x['codigo']))
+    
+    return lista_resultados[:n]
 
 
 def req_8(catalog):
