@@ -89,9 +89,9 @@ def print_req_2(control):
     
     print('\nTiempo de ejcución' + str(tiempo))
     print("\nPrimeros 5 registros:")
-    print(tabulate(res[:5], headers=headers, tablefmt="pipe"))
+    print(res[:5])
     print("\nÚltimos 5 registros:")
-    print(tabulate(res[-5:], headers=headers, tablefmt="pipe"))
+    print(res[-5:])
 
 
 

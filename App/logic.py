@@ -41,7 +41,7 @@ def load_data(catalog):
     """
     Carga los datos del reto
     """
-    files = data_dir + 'Crime_in_LA_100.csv'
+    files = data_dir + 'Crime_in_LA_20.csv'
     input_file = csv.DictReader(open(files, encoding='utf-8'))
 
 
@@ -161,6 +161,8 @@ def req_2(catalog, fecha_inicial, fecha_final):
 
     tiempo_inicial = get_time()
     root = catalog['por_fecha_reportado']['root']
+    fecha_inicial = datetime.strptime(fecha_inicial, "%Y-%m-%d").date()
+    fecha_final = datetime.strptime(fecha_final, "%Y-%m-%d").date()
     resultados = []
     result_data = []
     
