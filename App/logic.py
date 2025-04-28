@@ -156,7 +156,10 @@ def req_1(catalog,fecha_inicial,fecha_final):
 
     return crimenes_ordenados
 
-def req_2(catalog, area, fecha_inicial, fecha_final):
+def req_2(catalog, fecha_inicial, fecha_final):
+
+
+    tiempo_inicial = get_time()
     root = catalog['por_fecha_reportado']['root']
     resultados = []
     result_data = []
@@ -181,6 +184,16 @@ def req_2(catalog, area, fecha_inicial, fecha_final):
          }
          
          result_data.append(new_data)
+
+    tiempo_final = get_time()
+    
+    delta_time = tiempo_final - tiempo_inicial
+
+    return result_data , delta_time
+
+
+
+
          
     
 
@@ -276,7 +289,7 @@ def req_4(catalog,n,edad_inicial,edad_final):
     delta_time = tiempo_final - tiempo_incial
 
     
-    return resultados, total
+    return resultados, total, delta_time
 
 def req_5(catalog, n, inicial, final):
     """
