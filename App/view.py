@@ -56,15 +56,13 @@ def print_req_1(control):
     
     res = logic.req_1(control, fecha_inicial, fecha_final)
 
-    # Armar bien las filas para tabulate
     headers = ['DR_NO', 'DATE OCC', 'TIME OCC', 'AREA NAME', 'Crm Cd', 'LOCATION']
     
-    # Crear las filas basadas en los headers
     rows = []
     for crimen in res:
         fila = [
             crimen['DR_NO'],
-            crimen['DATE OCC'].strftime("%Y-%m-%d"),  # Mostrar solo fecha
+            crimen['DATE OCC'].strftime("%Y-%m-%d"),
             crimen['TIME OCC'],
             crimen['AREA NAME'],
             crimen['Crm Cd'],
@@ -73,22 +71,14 @@ def print_req_1(control):
         rows.append(fila)
 
     print("\nTotal registros encontrados:", len(res))
-
-    # 🚀 Aquí imprimimos los primeros 5
     print("\nPrimeros 5 registros:")
     print(tabulate(rows[:5], headers=headers, tablefmt="pipe"))
-
-    # 🚀 Aquí imprimimos los últimos 5
     print("\nÚltimos 5 registros:")
     print(tabulate(rows[-5:], headers=headers, tablefmt="pipe"))
 
 
 
 def print_req_2(control):
-    """
-        Función que imprime la solución del Requerimiento 2 en consola
-    """
-    # TODO: Imprimir el resultado del requerimiento 2
     pass
 
 

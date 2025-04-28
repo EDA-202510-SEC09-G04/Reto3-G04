@@ -125,10 +125,38 @@ def get_data(catalog, id):
 
 
 def req_1(catalog,fecha_inicial,fecha_final):
-    """
-    Retorna el resultado del requerimiento 1
-    """
     
+    fecha_inicial = datetime.strptime(fecha_inicial, "%Y-%m-%d").date()
+    fecha_final = datetime.strptime(fecha_final, "%Y-%m-%d").date()
+
+    # Recorrer el árbol manualmente
+    root = catalog['por_fecha_ocurrido']['root']
+    crimenes_en_rango = []
+    busqueda_entre_fechas(root, fecha_inicial, fecha_final, crimenes_en_rango)
+
+   
+    crimenes_list = []
+    for crimen in crimenes_en_rango:
+        if isinstance(crimen, dict):
+            crimenes_list.append(crimen)
+
+    print("Cantidad total de crímenes después de buscar:", len(crimenes_list))
+
+    # Definir key de ordenamiento
+    def key_fn(item):
+        hora = int(item['TIME OCC']) if isinstance(item['TIME OCC'], str) else item['TIME OCC']
+        return (
+            item['DATE OCC'].date(),
+            hora,
+            ''.join(chr(255 - ord(c)) for c in item['AREA NAME'])
+        )
+
+    # Ordenar
+    crimenes_ordenados = sorted(crimenes_list, key=key_fn, reverse=True)
+
+    return crimenes_ordenados
+
+def req_2(catalog, area, fecha_inicial, fecha_final):
     root = catalog['por_fecha_reportado']['root']
     resultados = []
     result_data = []
@@ -155,16 +183,8 @@ def req_1(catalog,fecha_inicial,fecha_final):
          result_data.append(new_data)
          
     
-    return result_data
-        
 
-
-def req_2(catalog):
-    """
-    Retorna el resultado del requerimiento 2
-    """
-    # TODO: Modificar el requerimiento 2
-    pass
+    
 
 
 def req_3(catalog, n, area):
