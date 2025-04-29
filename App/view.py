@@ -29,8 +29,8 @@ def load_data(control):
     """
     Carga los datos
     """
-    catalog, primeros, ultimos = logic.load_data(control)
-    return catalog, primeros, ultimos
+    catalog, primeros, ultimos, delta = logic.load_data(control)
+    return catalog, primeros, ultimos, delta
 
 def print_rango_fechas(control):
     """
@@ -54,7 +54,7 @@ def print_req_1(control):
     fecha_inicial = input('Ingrese la fecha inicial (YYYY-MM-DD): ')
     fecha_final = input('Ingrese la fecha final (YYYY-MM-DD): ')
     
-    res = logic.req_1(control, fecha_inicial, fecha_final)
+    res, delta = logic.req_1(control, fecha_inicial, fecha_final)
 
     headers = ['DR_NO', 'DATE OCC', 'TIME OCC', 'AREA NAME', 'Crm Cd', 'LOCATION']
     
@@ -71,10 +71,14 @@ def print_req_1(control):
         rows.append(fila)
 
     print("\nTotal registros encontrados:", len(res))
-    print("\nPrimeros 5 registros:")
-    print(tabulate(rows[:5], headers=headers, tablefmt="pipe"))
-    print("\nÚltimos 5 registros:")
-    print(tabulate(rows[-5:], headers=headers, tablefmt="pipe"))
+    print("\nRegistros encontrados:")
+    if len(rows) > 10:
+        rows_to_show = rows[:5] + rows[-5:]
+    else:
+        rows_to_show = rows
+    print(tabulate(rows_to_show, headers=headers, tablefmt="pipe"))
+    print(f"\nTiempo de ejecución: {delta} ms")
+
 
 
 
@@ -101,7 +105,9 @@ def print_req_3(control):
     """
     area = input('Ingrese el area que quiere consultar: ')
     n = int(input('Ingrese el n que quiere consultar: '))
-    res, size = logic.req_3(control, n, area)
+    res, size, delta = logic.req_3(control, n, area)
+    
+    print(f"\nTiempo de ejecución (ms): {delta:.2f}")
     
     headers = ['DR_NO', 'Date Rptd', 'TIME OCC', 'AREA NAME', 'Rpt Dist No', 'Part 1-2', 'Crm Cd', 'Status', 'LOCATION']
     rows = [[d[h] for h in headers] for d in res]
@@ -133,21 +139,31 @@ def print_req_4(control):
 
 def print_req_5(control):
     """
-        Función que imprime la solución del Requerimiento 5 en consola
+    Función que imprime la solución del Requerimiento 5 en consola
     """
-    n = int(input('Ingrese el n que quiere consultar: '))
-    inicial = input('Ingrese la fecha inicial en formato yy-mm-dd: ')
-    final = input('Ingrese la fecha final en formato yy-mm-dd: ')
+    fecha_inicial = input('Ingrese la fecha inicial (YYYY-MM-DD): ')
+    fecha_final = input('Ingrese la fecha final (YYYY-MM-DD): ')
+    n = int(input('Ingrese el número de áreas a consultar: '))
 
-    res, size = logic.req_5(control, n, inicial, final)
-    
-    print('\nTotal crimenes no resueltos entre el rango de fechas: ' + str(size))
-    
-    headers = ['area_number', 'area_name', 'count', 'mayor', 'menor']
-    rows = [[d[h] for h in headers] for d in res]
-    
-    print("\n N registros:")
+    res, size, delta = logic.req_5(control, n, fecha_inicial, fecha_final)
+
+    headers = ['area_number', 'area_name', 'count', 'menor', 'mayor']
+    rows = []
+    for area in res:
+        fila = [
+            area['area_number'],
+            area['area_name'],
+            area['count'],
+            area['menor'].strftime("%Y-%m-%d"),
+            area['mayor'].strftime("%Y-%m-%d")
+        ]
+        rows.append(fila)
+
+    print("\nTotal de incidentes resueltos IC:", size)
+    print("\nÁreas con más incidentes:")
     print(tabulate(rows, headers=headers, tablefmt="pipe"))
+    print(f"\nTiempo de ejecución: {delta} ms")
+
     
 
 def print_req_6(control):
@@ -159,23 +175,29 @@ def print_req_6(control):
 
 
 def print_req_7(control):
-    n = int(input('Ingrese el número N de crímenes más comunes a calcular: '))
-    sexo = input('Ingrese el sexo de la víctima (M/F): ')
-    edad_inicial = int(input('Ingrese la edad inicial: '))
-    edad_final = int(input('Ingrese la edad final: '))
-    
-    resultados = logic.req_7(control, n, sexo, edad_inicial, edad_final)
-    
-    for crimen in resultados:
-        print(f"Código del crimen: {crimen['codigo']}")
-        print(f"Cantidad de crímenes cometidos: {crimen['total']}")
-        print("Cantidad de crímenes por edad:")
-        for edad, cantidad in crimen['por_edad'].items():
-            print(f"  Edad {edad}: {cantidad}")
-        print("Cantidad de crímenes por año:")
-        for anio, cantidad in crimen['por_anio'].items():
-            print(f"  Año {anio}: {cantidad}")
-        print("-" * 40)
+    """
+    Función que imprime la solución del Requerimiento 7 en consola
+    """
+    n = int(input('Ingrese la cantidad de crímenes: '))
+    sexo = input('Ingrese el sexo de la víctima (M/F/X): ')
+    edad_inicial = int(input('Ingrese edad mínima: '))
+    edad_final = int(input('Ingrese edad máxima: '))
+
+    res, delta = logic.req_7(control, n, sexo, edad_inicial, edad_final)
+
+    headers = ['Código', 'Total Crímenes']
+    rows = []
+    for crimen in res:
+        fila = [
+            crimen['codigo'],
+            crimen['total']
+        ]
+        rows.append(fila)
+
+    print("\nCrímenes encontrados:")
+    print(tabulate(rows, headers=headers, tablefmt="pipe"))
+    print(f"\nTiempo de ejecución: {delta} ms")
+
 
 
 def print_req_8(control):
@@ -204,8 +226,10 @@ def main():
 
         if int(inputs) == 1:
             print("Cargando información de los archivos ....\n")
-            catalog, primeros, ultimos = load_data(control)
+            catalog, primeros, ultimos, delta = load_data(control)
             #print(catalog['por_fecha_ocurrido'])
+            
+            print(f"\nTiempo de ejecución de la carga de datos: {delta:.3f} ms")
             
             headers = ['DR_NO', 'Date Rptd', 'DATE OCC', 'AREA NAME', 'Crm Cd']
             rows = [[d[h] for h in headers] for d in primeros]

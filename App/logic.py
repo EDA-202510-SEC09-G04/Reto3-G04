@@ -41,6 +41,7 @@ def load_data(catalog):
     """
     Carga los datos del reto
     """
+    tiempo_inicial = get_time()
     files = data_dir + 'Crime_in_LA_20.csv'
     input_file = csv.DictReader(open(files, encoding='utf-8'))
 
@@ -87,7 +88,11 @@ def load_data(catalog):
     
     primeros = catalog['registros']['elements'][:5]
     ultimos = catalog['registros']['elements'][-5:]
-    return catalog, primeros, ultimos 
+    
+    tiempo_final = get_time()
+    delta = delta_time(tiempo_inicial, tiempo_final)
+    
+    return catalog, primeros, ultimos, delta
             
         
 
@@ -325,6 +330,7 @@ def req_5(catalog, n, inicial, final):
     #buscar crimenes entre rango de fechas con el arbol por fecha
 
     #cambiar a formato m d y
+    tiempo_inicial = get_time()
 
     inicial = datetime.strptime(inicial, "%Y-%m-%d").date()
     final = datetime.strptime(final, "%Y-%m-%d").date()
@@ -381,7 +387,9 @@ def req_5(catalog, n, inicial, final):
     for _ in range(n):  
         top_n.append(hp.heap_pop(lista_areas, key_fn))
         
-    return top_n, size
+    tiempo_final = get_time()
+    delta_time = tiempo_final - tiempo_inicial
+    return top_n, size, delta_time
     
 
 def req_6(catalog):
