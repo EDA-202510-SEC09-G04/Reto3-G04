@@ -140,6 +140,8 @@ def get_data(catalog, id):
 
 def req_1(catalog,fecha_inicial,fecha_final):
     
+    tiempo_inicial = get_time()
+    
     fecha_inicial = datetime.strptime(fecha_inicial, "%Y-%m-%d").date()
     fecha_final = datetime.strptime(fecha_final, "%Y-%m-%d").date()
 
@@ -166,9 +168,14 @@ def req_1(catalog,fecha_inicial,fecha_final):
         )
 
     # Ordenar
+    
     crimenes_ordenados = sorted(crimenes_list, key=key_fn, reverse=True)
 
-    return crimenes_ordenados
+    tiempo_final = get_time()
+    delta = delta_time(tiempo_inicial, tiempo_final)
+
+
+    return crimenes_ordenados, delta
 
 def req_2(catalog, fecha_inicial, fecha_final):
 
@@ -221,6 +228,8 @@ def req_3(catalog, n, area):
     Retorna el resultado del requerimiento 3
     """
     #lista de los crimenes del area
+    tiempo_inicial = get_time()
+    
     area_selected = msc.get(catalog['por_area'], area)
     
     #crear heap a partir del area
@@ -233,9 +242,11 @@ def req_3(catalog, n, area):
     top_n = []
     for _ in range(n):  
         top_n.append(hp.heap_pop(area_selected, key_fn))
-        
     
-    return top_n, size
+    tiempo_final = get_time()
+    delta_time = tiempo_final - tiempo_inicial    
+    
+    return top_n, size, delta_time
     
     
     
@@ -382,6 +393,8 @@ def req_6(catalog):
 
 
 def req_7(catalog, n, sexo, edad_inicial, edad_final):
+    tiempo_inicial = get_time()
+    
     resultados = {}
     
     res = []
@@ -409,7 +422,10 @@ def req_7(catalog, n, sexo, edad_inicial, edad_final):
     
     lista_resultados.sort(key=lambda x: (-x['total'], x['codigo']))
     
-    return lista_resultados[:n]
+    tiempo_final = get_time()
+    delta_time = tiempo_final - tiempo_inicial
+    
+    return lista_resultados[:n], delta_time
 
 
 def req_8(catalog):
