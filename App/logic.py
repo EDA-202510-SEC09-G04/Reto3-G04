@@ -392,12 +392,49 @@ def req_5(catalog, n, inicial, final):
     return top_n, size, delta_time
     
 
-def req_6(catalog):
+def req_6(catalog, n, sexo, mes):
     """
-    Retorna el resultado del requerimiento 6
+    Retorna el resultado del requerimiento 6. n areas mas seguras para un sexo en un mes del año
     """
-    # TODO: Modificar el requerimiento 6
-    pass
+    def key_fn(tupla):
+        prioridad, _ = tupla
+        return (-prioridad[0], -prioridad[1], prioridad[2])
+    
+    crimenes_por_area = catalog['por_area']
+    heap = []
+    
+    
+    for area in msc.key_set(crimenes_por_area)['elements']:
+        crimenes = msc.get(crimenes_por_area, area)
+
+        contador_crimenes = 0
+        años = {}
+        
+        for crimen in crimenes:
+            mes_occ = crimen['DATE OCC'].month
+            año = crimen['DATE OCC'].year
+            if crimen['Vict Sex'] == sexo and mes_occ == mes:
+                contador_crimenes += 1
+                años[año] = años.get(año, 0) + 1
+                
+        if contador_crimenes > 0:
+            nombre_area = crimenes[0]['AREA NAME']
+            area_id = crimenes[0]['AREA']
+            prioridad = (contador_crimenes, len(años), nombre_area)
+            hp.heap_insert(heap, key_fn, (prioridad, (area_id, nombre_area, contador_crimenes, años)))
+            
+    
+
+    resultados = []
+    for _ in range(n):
+        if heap:
+            _, info = hp.heap_pop(heap, key_fn)
+            resultados.append(info)
+
+    return resultados
+                
+
+    
 
 
 def req_7(catalog, n, sexo, edad_inicial, edad_final):

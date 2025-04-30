@@ -170,8 +170,22 @@ def print_req_6(control):
     """
         Función que imprime la solución del Requerimiento 6 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 6
-    pass
+    n = int(input('Ingrese el número de áreas a consultar: '))
+    sexo = input('Ingrese el sexo consultar: ')
+    mes = int(input('Ingrese el mes a consultar: '))
+    
+    res = logic.req_6(control, n, sexo, mes)
+
+
+    formatted_data = [
+        (id_, name, value, ', '.join([f'{year}: {count}' for year, count in years.items()]))
+        for id_, name, value, years in res
+    ]
+
+    headers = ['ID', 'Area', 'Crimenes', 'Por año']
+    print(tabulate(formatted_data, headers=headers, tablefmt='grid'))
+
+
 
 
 def print_req_7(control):
