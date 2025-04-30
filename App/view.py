@@ -2,6 +2,7 @@ import sys
 from App import logic
 from tabulate import tabulate
 from datetime import datetime
+import pprint as pprint
 
 
 def new_logic():
@@ -218,8 +219,27 @@ def print_req_8(control):
     """
         Función que imprime la solución del Requerimiento 8 en consola
     """
-    # TODO: Imprimir el resultado del requerimiento 8
-    pass
+    n = int(input('Ingrese la cantidad de crímenes: '))
+    tipo = (input('Ingrese el tipo: '))
+    area = (input('Ingrese el area de partida: '))
+    primeros, ultimos = logic.req_8(control, area, n, tipo)
+    print('N crimenes más cercanos: ')
+    table_data = [
+        (round(score, 2), area, start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), code)
+        for score, area, start, end, code in primeros]
+    table_data2 = [
+        (round(score, 2), area, start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), code)
+        for score, area, start, end, code in ultimos]
+
+    headers = ["Distancia", "Area", "Fecha Crimen 1", "Fecha Crimen 2", "Tipo"]
+
+    print(tabulate(table_data, headers=headers, tablefmt="fancy_grid"))
+    print('')
+    print('')
+    print('N crimenes más lejanos: ')
+    print(tabulate(table_data2, headers=headers, tablefmt="fancy_grid"))
+    
+    
 
 
 # Se crea la lógica asociado a la vista

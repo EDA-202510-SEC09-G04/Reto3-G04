@@ -1,7 +1,9 @@
+from dis import dis
 import time
 import os
 import csv
 import sys
+import math
 import pprint as pprint
 from datetime import datetime
 from DataStructures.Map import map_separate_chaining as msc
@@ -435,6 +437,11 @@ def req_6(catalog, n, sexo, mes):
                 
 
     
+def get_time():
+    """
+    devuelve el instante tiempo de procesamiento en milisegundos
+    """
+    return float(time.perf_counter()*1000)
 
 
 def req_7(catalog, n, sexo, edad_inicial, edad_final):
@@ -473,21 +480,83 @@ def req_7(catalog, n, sexo, edad_inicial, edad_final):
     return lista_resultados[:n], delta_time
 
 
-def req_8(catalog):
+def req_8(catalog, area_esc, n, tipo):
     """
     Retorna el resultado del requerimiento 8
     """
-    # TODO: Modificar el requerimiento 8
-    pass
+    areas = catalog['por_area']
+    crimenes_esc = msc.get(catalog['por_area'], area_esc)
+    """ areas = {
+        'A':
+            [{'Crm Cd': 1, "LAT": 34.05, "LON": -118.25, 'AREA NAME': 'A', 'DATE OCC': '1'},
+            {'Crm Cd': 1, "LAT": 32.05, "LON": -148.25, 'AREA NAME': 'B', 'DATE OCC': '13'}
+        ],
+        'B':
+                [{'Crm Cd': 1, "LAT": 334.05, "LON": 18.25, 'AREA NAME': 'B', 'DATE OCC': '19'},
+                {'Crm Cd': 0, "LAT": 37.05, "LON": -18.25, 'AREA NAME': 'B', 'DATE OCC': '11'}
+            ],
+        'C':
+                [{'Crm Cd': 1, "LAT": 44.05, "LON": 10.25, 'AREA NAME': 'C', 'DATE OCC': '3'},
+                {'Crm Cd': 1, "LAT": 37.05, "LON": -18.25, 'AREA NAME': 'C', 'DATE OCC': '0'}
+            ]
+    }
+    
+    crimenes_esc = [
+        {'Crm Cd': 0, "LAT": 11.05, "LON": 19.25, 'AREA NAME': 'A', 'DATE OCC': '4'},
+        {'Crm Cd': 1, "LAT": 67.05, "LON": -19.25, 'AREA NAME': 'A', 'DATE OCC': '5'},
+        {'Crm Cd': 1, "LAT": 66.05, "LON": 103.25, 'AREA NAME': 'A', 'DATE OCC': '3'},
+        {'Crm Cd': 1, "LAT": 17.05, "LON": -3.25, 'AREA NAME': 'A', 'DATE OCC': '2'}
+    ] """
+    distancias= []
+    print('Realizando comparaciones... ')
+    for area, crimenes in msc.map_items(areas):
+         if area != area_esc:
+            for crimen1 in crimenes_esc:
+                if crimen1['Crm Cd'] == tipo:
+                    fecha_c1 =crimen1['DATE OCC']
+                    for crimen2 in crimenes:
+                        if crimen2['Crm Cd'] == tipo:
+                            area_c2 = crimen2['AREA NAME']
+                            fecha_c2 = crimen2['DATE OCC']
+                            d = haversine(float(crimen1["LAT"]), float(crimen1["LON"]), float(crimen2["LAT"]), float(crimen2["LON"]))
+                            
+                            #meter crimen a la lista
+                            distancias.append((d, area_c2, fecha_c1, fecha_c2, tipo))
+    print('Comparaciones finalizadas ')  
+
+    print('Sorting distancias... ')  
+    #res = insertion(distancias)
+    
+    def key_fn(tupla):
+        return (tupla[0])
+    
+    def key_fn2(tupla):
+        return (-tupla[0])
+    
+    primeros = distancias
+    ultimos = distancias
+    
+    hp.build_heap(primeros, key_fn)
+    hp.build_heap(ultimos, key_fn2)
+    
+    cercanos_n = []
+    for _ in range(n):  
+        cercanos_n.append(hp.heap_pop(primeros, key_fn))
+        
+    lejanos_n = []
+    for _ in range(n):  
+        lejanos_n.append(hp.heap_pop(ultimos, key_fn2))
+        
+    print('Sorting Finalizado ')  
+
+    return cercanos_n, lejanos_n
+
+
 
 
 # Funciones para medir tiempos de ejecucion
 
-def get_time():
-    """
-    devuelve el instante tiempo de procesamiento en milisegundos
-    """
-    return float(time.perf_counter()*1000)
+
 
 
 def delta_time(start, end):
@@ -496,3 +565,31 @@ def delta_time(start, end):
     """
     elapsed = float(end - start)
     return elapsed
+
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371.0
+    
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+    
+    dlat = lat2_rad - lat1_rad
+    dlon = lon2_rad - lon1_rad
+    
+    a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    
+    distance = R * c
+    
+    return distance
+
+def insertion(lst):
+    for i in range(1, len(lst)):
+        key = lst[i]
+        j = i - 1
+        while j >= 0 and lst[j][0] > key[0]:
+            lst[j + 1] = lst[j]
+            j -= 1
+        lst[j + 1] = key
+    return lst

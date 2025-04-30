@@ -179,3 +179,12 @@ def rehash(map_struct):
     except Exception as e:
         error.reraise(e, 'rehash')
 
+def map_items(map_struct):
+    items = []
+    for i in range(map_struct['capacity']):
+        bucket = al.get_element(map_struct['table'], i)
+        for j in range(slist.size(bucket)):
+            entry = slist.get_element(bucket, j)
+            items.append((entry['key'], entry['value']))
+    return items
+
