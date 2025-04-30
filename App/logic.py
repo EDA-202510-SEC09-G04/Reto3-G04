@@ -44,7 +44,7 @@ def load_data(catalog):
     Carga los datos del reto
     """
     tiempo_inicial = get_time()
-    files = data_dir + 'Crime_in_LA_20.csv'
+    files = data_dir + 'Crime_in_LA_100.csv'
     input_file = csv.DictReader(open(files, encoding='utf-8'))
 
 
@@ -398,6 +398,7 @@ def req_6(catalog, n, sexo, mes):
     """
     Retorna el resultado del requerimiento 6. n areas mas seguras para un sexo en un mes del año
     """
+    tiempo_inicial = get_time()
     def key_fn(tupla):
         prioridad, _ = tupla
         return (-prioridad[0], -prioridad[1], prioridad[2])
@@ -432,8 +433,10 @@ def req_6(catalog, n, sexo, mes):
         if heap:
             _, info = hp.heap_pop(heap, key_fn)
             resultados.append(info)
-
-    return resultados
+    tiempo_final = get_time()
+    delta_time = tiempo_final - tiempo_inicial
+    
+    return resultados, delta_time
                 
 
     
@@ -484,6 +487,7 @@ def req_8(catalog, area_esc, n, tipo):
     """
     Retorna el resultado del requerimiento 8
     """
+    tiempo_inicial = get_time()
     areas = catalog['por_area']
     crimenes_esc = msc.get(catalog['por_area'], area_esc)
     """ areas = {
@@ -549,7 +553,10 @@ def req_8(catalog, area_esc, n, tipo):
         
     print('Sorting Finalizado ')  
 
-    return cercanos_n, lejanos_n
+    tiempo_final = get_time()
+    delta_time = tiempo_final - tiempo_inicial
+    
+    return cercanos_n, lejanos_n, delta_time
 
 
 

@@ -175,7 +175,7 @@ def print_req_6(control):
     sexo = input('Ingrese el sexo consultar: ')
     mes = int(input('Ingrese el mes a consultar: '))
     
-    res = logic.req_6(control, n, sexo, mes)
+    res, delta = logic.req_6(control, n, sexo, mes)
 
 
     formatted_data = [
@@ -185,6 +185,8 @@ def print_req_6(control):
 
     headers = ['ID', 'Area', 'Crimenes', 'Por año']
     print(tabulate(formatted_data, headers=headers, tablefmt='grid'))
+    print(f"\nTiempo de ejecución: {delta} ms")
+
 
 
 
@@ -222,7 +224,7 @@ def print_req_8(control):
     n = int(input('Ingrese la cantidad de crímenes: '))
     tipo = (input('Ingrese el tipo: '))
     area = (input('Ingrese el area de partida: '))
-    primeros, ultimos = logic.req_8(control, area, n, tipo)
+    primeros, ultimos, delta = logic.req_8(control, area, n, tipo)
     print('N crimenes más cercanos: ')
     table_data = [
         (round(score, 2), area, start.strftime("%Y-%m-%d"), end.strftime("%Y-%m-%d"), code)
@@ -239,6 +241,8 @@ def print_req_8(control):
     print('N crimenes más lejanos: ')
     print(tabulate(table_data2, headers=headers, tablefmt="fancy_grid"))
     
+    print(f"\nTiempo de ejecución: {delta} ms")
+
     
 
 
