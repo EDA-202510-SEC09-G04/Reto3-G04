@@ -91,12 +91,29 @@ def print_req_2(control):
     res, tiempo = logic.req_2(control,fecha_inicial,fecha_final)
 
     headers = ['DR_NO', 'DATE OCC', 'TIME OCC', 'AREA','AREA NAME', 'Part 1-2','Crm Cd', 'Status']
+    primeros = res[:5]
+    ultimos = res[-5:]
     
+    def format_row(d, headers):
+        row = []
+        for h in headers:
+            val = d.get(h, '')
+            if isinstance(val, datetime):
+                val = val.strftime('%Y-%m-%d')
+            row.append(val)
+        return row
+
+    rows = [format_row(d, headers) for d in primeros]
+    rows2 = [format_row(d, headers) for d in ultimos]
+
+
     print('\nTiempo de ejcución' + str(tiempo))
     print("\nPrimeros 5 registros:")
-    print(res[:5])
+        
+    print(tabulate(rows, headers=headers, tablefmt="pipe"))
+
     print("\nÚltimos 5 registros:")
-    print(res[-5:])
+    print(tabulate(rows2, headers=headers, tablefmt="pipe"))
 
 
 
@@ -129,11 +146,11 @@ def print_req_4(control):
     numero_datos = int(input('Ingrese el número de datos que desea consultar:'))
     res, size,time = logic.req_4(control,numero_datos,edad_inicial,edad_final)
     
-    headers = ['DR_NO', 'Date Rptd', 'TIME OCC','AREA', 'AREA NAME', 'Part 1-2', 'Crm Cd', 'Status', 'LOCATION']
+    headers = ['DR_NO', 'Date Rptd', 'TIME OCC','AREA', 'AREA NAME', 'Part 1-2', 'Crm Cd','Vict Age', 'Status', 'LOCATION']
     rows = [[d[h] for h in headers] for d in res]
 
     print('\n Tiempo de ejecución: ' + str(time))
-    print('\nTotal registros que cumplen el filtro de edad' + str(size))
+    print('\nTotal registros que cumplen el filtro de edad ' + str(size))
     print(tabulate(rows, headers=headers, tablefmt="pipe"))
 
    
@@ -202,12 +219,14 @@ def print_req_7(control):
 
     res, delta = logic.req_7(control, n, sexo, edad_inicial, edad_final)
 
-    headers = ['Código', 'Total Crímenes']
+    headers = ['Código', 'Total Crímenes', 'Por Edad', 'Por Año']
     rows = []
     for crimen in res:
         fila = [
             crimen['codigo'],
-            crimen['total']
+            crimen['total'],
+            crimen['por_edad'],
+            crimen['por_anio']
         ]
         rows.append(fila)
 

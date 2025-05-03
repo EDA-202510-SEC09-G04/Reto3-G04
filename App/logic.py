@@ -44,7 +44,7 @@ def load_data(catalog):
     Carga los datos del reto
     """
     tiempo_inicial = get_time()
-    files = data_dir + 'Crime_in_LA_100.csv'
+    files = data_dir + 'Crime_in_LA_20.csv'
     input_file = csv.DictReader(open(files, encoding='utf-8'))
 
 
@@ -165,18 +165,17 @@ def req_1(catalog,fecha_inicial,fecha_final):
 
     print("Cantidad total de crímenes después de buscar:", len(crimenes_list))
 
-    # Definir key de ordenamiento
     def key_fn(item):
-        hora = int(item['TIME OCC']) if isinstance(item['TIME OCC'], str) else item['TIME OCC']
         return (
             item['DATE OCC'].date(),
-            hora,
-            ''.join(chr(255 - ord(c)) for c in item['AREA NAME'])
+            ''.join(chr(255 - ord(c)) for c in item['AREA NAME'])  # Invierte para que AREA NAME sea descendente
         )
+        
+    crimenes_ordenados = sorted(crimenes_list, key=key_fn)
 
-    # Ordenar
-    
-    crimenes_ordenados = sorted(crimenes_list, key=key_fn, reverse=True)
+
+    #crimenes_list.sort(key=lambda x: x['AREA NAME'], reverse=True)
+    #crimenes_list.sort(key=lambda x: x['DATE OCC'])
 
     tiempo_final = get_time()
     delta = delta_time(tiempo_inicial, tiempo_final)
@@ -196,13 +195,13 @@ def req_2(catalog, fecha_inicial, fecha_final):
     
     busqueda_entre_fechas(root,fecha_inicial,fecha_final,resultados)
     
-    
     for i in resultados:
         
-        if i['Part 1-2'] == '1':
-         new_data = {
+        if i['Part 1-2'] == '1' and i['Status'] != 'IC':
+            new_data = {
             
             'DR_NO': i['DR_NO'],
+            'Date Rptd': i['Date Rptd'],
             'DATE OCC':i['DATE OCC'],
             'TIME OCC': i['TIME OCC'],
             'AREA':i['AREA'],
@@ -210,10 +209,11 @@ def req_2(catalog, fecha_inicial, fecha_final):
             'Part 1-2': i['Part 1-2'],
             'Crm Cd':i['Crm Cd'],
             'Status':i['Status']
-            
-         }
-         
-         result_data.append(new_data)
+            }
+            result_data.append(new_data)
+
+    result_data.sort(key=lambda x: x['AREA NAME'], reverse=True)
+    result_data.sort(key=lambda x: x['Date Rptd'])
 
     tiempo_final = get_time()
     
@@ -263,12 +263,12 @@ def numero_crimenes_por_edad(catalog,n,edad_inicial,edad_final):
     resultado = []
     resultado_crimenes_graves = []
     resultado_crimenes_pequeños = []
-    total_number = len(resultado)
+    
     
     
     busqueda_entre_fechas(root,edad_inicial,edad_final,resultado)
     resultado.sort(key=lambda x: x ['Vict Age'])
-    
+    total_number = len(resultado)
     for i in range(n,1,-1):
         
         new_data = {
@@ -315,7 +315,6 @@ def req_4(catalog,n,edad_inicial,edad_final):
     """
     Retorna el resultado del requerimiento 4
     """
-    # TODO: Modificar el requerimiento 4
     tiempo_incial = get_time()
     resultados, total = numero_crimenes_por_edad(catalog,n,edad_inicial,edad_final)
     tiempo_final = get_time()
@@ -537,8 +536,8 @@ def req_8(catalog, area_esc, n, tipo):
     def key_fn2(tupla):
         return (-tupla[0])
     
-    primeros = distancias
-    ultimos = distancias
+    primeros = distancias.copy()
+    ultimos = distancias.copy()
     
     hp.build_heap(primeros, key_fn)
     hp.build_heap(ultimos, key_fn2)
